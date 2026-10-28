@@ -1,7 +1,9 @@
 
 class UrlAnalyzer {
-  /// Analyzes a URL without opening or visiting it.
-  List<String> analyze(Uri uri) {
+  List<String> analyze(
+      Uri uri, {
+        String? rawUrl,
+      }) {
     final findings = <String>[];
 
     _checkHttp(uri, findings);
@@ -10,68 +12,87 @@ class UrlAnalyzer {
     _checkPunycode(uri, findings);
     _checkSubdomains(uri, findings);
     _checkKeywords(uri, findings);
+    _checkUnusualPort(uri, findings);
+    _checkEncodedPath(rawUrl ?? uri.toString(), findings);
 
     return findings;
   }
 
-  // Check whether the URL uses unencrypted HTTP.
   void _checkHttp(Uri uri, List<String> findings) {
     if (uri.scheme.toLowerCase() == 'http') {
       findings.add(
         'This URL uses HTTP instead of HTTPS. '
-            'Information sent over this connection may not be encrypted.',
+            'The connection is not protected by HTTPS encryption.',
       );
     }
   }
 
-  // Check whether the hostname is an IPv4 address.
+
   void _checkIpAddress(Uri uri, List<String> findings) {
     final host = uri.host;
 
-    final ipv4Pattern = RegExp(
-      r'^(?:\d{1,3}\.){3}\d{1,3}$',
-    );
+    try {
+      Uri.parseIPv4Address(host);
 
-    if (ipv4Pattern.hasMatch(host)) {
       findings.add(
-        'This URL uses an IP address instead of a domain name.',
+        'This URL uses an IPv4 address instead of a domain name.',
       );
+      return;
+    } on FormatException {
+      // Not IPv4.
+    }
+
+    try {
+      Uri.parseIPv6Address(
+        host.replaceAll('[', '').replaceAll(']', ''),
+      );
+
+      findings.add(
+        'This URL uses an IPv6 address instead of a domain name.',
+      );
+    } on FormatException {
+      // Not IPv6.
     }
   }
 
-  // Check for embedded user information.
+
   void _checkCredentials(Uri uri, List<String> findings) {
     if (uri.userInfo.isNotEmpty) {
       findings.add(
         'This URL contains embedded user information. '
-            'This can be used to disguise the actual destination.',
+            'The actual destination is the hostname after the @ symbol.',
       );
     }
   }
 
-  // Check for Punycode in the hostname.
   void _checkPunycode(Uri uri, List<String> findings) {
-    if (uri.host.toLowerCase().contains('xn--')) {
+    final labels = uri.host.toLowerCase().split('.');
+
+    if (labels.any((label) => label.startsWith('xn--'))) {
       findings.add(
-        'This domain contains Punycode, which may represent '
-            'international characters or visually similar letters.',
+        'This domain uses Punycode encoding. '
+            'International characters may resemble other letters.',
       );
     }
   }
 
-  // Check for unusually many hostname labels.
   void _checkSubdomains(Uri uri, List<String> findings) {
-    final labels = uri.host.split('.');
+    final host = uri.host;
+
+    if (host.contains(':')) {
+      return;
+    }
+
+    final labels = host.split('.');
 
     if (labels.length > 4) {
       findings.add(
-        'This URL contains an unusually large number '
-            'of subdomain levels.',
+        'This hostname contains many subdomain levels. '
+            'Verify the actual registered domain.',
       );
     }
   }
 
-  // Check for common phishing-related keywords.
   void _checkKeywords(Uri uri, List<String> findings) {
     const suspiciousKeywords = [
       'verify-account',
@@ -90,6 +111,33 @@ class UrlAnalyzer {
               'keyword: "$keyword".',
         );
       }
+    }
+  }
+
+  void _checkUnusualPort(Uri uri, List<String> findings) {
+    if (!uri.hasPort) {
+      return;
+    }
+
+    final standardPort =
+        (uri.scheme == 'http' && uri.port == 80) ||
+            (uri.scheme == 'https' && uri.port == 443);
+
+    if (!standardPort) {
+      findings.add(
+        'This URL specifies a non-standard port: ${uri.port}.',
+      );
+    }
+  }
+
+  void _checkEncodedPath(
+      String rawUrl,
+      List<String> findings,
+      ) {
+    if (RegExp(r'%[0-9a-fA-F]{2}').hasMatch(rawUrl)) {
+      findings.add(
+        'This URL contains percent-encoded characters.',
+      );
     }
   }
 }

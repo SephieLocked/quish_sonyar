@@ -23,7 +23,7 @@ void main() {
       final findings = analyzer.analyze(uri);
 
       expect(
-        findings.any((finding) => finding.contains('IP address')),
+        findings.any((finding) => finding.contains('IPv4 address')),
         isTrue,
       );
     });
@@ -61,5 +61,75 @@ void main() {
 
       expect(findings, isEmpty);
     });
+
+
+    test('Detects IPv6 hostnames', () {
+      final uri = Uri.parse('https://[2001:db8::1]/login');
+
+      final findings = analyzer.analyze(uri);
+
+      expect(
+        findings.any((f) => f.contains('IPv6 address')),
+        isTrue,
+      );
+    });
+
+    test('Detects unusual ports', () {
+      final uri = Uri.parse('https://example.com:8443/login');
+
+      final findings = analyzer.analyze(uri);
+
+      expect(
+        findings.any((f) => f.contains('non-standard port')),
+        isTrue,
+      );
+    });
+
+    test('Does not flag standard HTTPS port', () {
+      final uri = Uri.parse('https://example.com:443');
+
+      final findings = analyzer.analyze(uri);
+
+      expect(
+        findings.any((f) => f.contains('non-standard port')),
+        isFalse,
+      );
+    });
+
+    test('Detects percent-encoded paths', () {
+      const rawUrl = 'https://example.com/%76erify-account';
+
+      final findings = analyzer.analyze(
+        Uri.parse(rawUrl),
+        rawUrl: rawUrl,
+      );
+
+      expect(
+        findings.any((f) => f.contains('percent-encoded')),
+        isTrue,
+      );
+    });
+
+    test('Detects keywords in decoded paths', () {
+      final uri = Uri.parse(
+        'https://example.com/%76erify-account',
+      );
+
+      final findings = analyzer.analyze(uri);
+
+      expect(
+        findings.any((f) => f.contains('verify-account')),
+        isTrue,
+      );
+    });
+
+    test('Does not flag ordinary HTTPS URLs', () {
+      final uri = Uri.parse('https://example.com/about');
+
+      final findings = analyzer.analyze(uri);
+
+      expect(findings, isEmpty);
+    });
+
   });
 }

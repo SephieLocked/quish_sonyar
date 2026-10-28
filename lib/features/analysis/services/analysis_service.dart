@@ -39,7 +39,7 @@ class AnalysisService {
       );
     }
 
-    final findings = _urlAnalyzer.analyze(uri);
+    final findings = _urlAnalyzer.analyze(uri, rawUrl:content,);
 
     // Determine a preliminary risk classification.
     final riskLevel = _classifyRisk(findings);
