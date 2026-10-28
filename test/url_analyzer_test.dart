@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quish_sonyar/features/analysis/services/url_analyzer.dart';
 
@@ -12,7 +11,7 @@ void main() {
       final findings = analyzer.analyze(uri);
 
       expect(
-        findings.any((finding) => finding.contains('HTTP')),
+        findings.any((finding) => finding.description.contains('HTTP')),
         isTrue,
       );
     });
@@ -23,33 +22,31 @@ void main() {
       final findings = analyzer.analyze(uri);
 
       expect(
-        findings.any((finding) => finding.contains('IPv4 address')),
+        findings.any((finding) => finding.description.contains('IPv4 address')),
         isTrue,
       );
     });
 
     test('Detects embedded credentials', () {
-      final uri = Uri.parse(
-        'https://example.com@other.example/login',
-      );
+      final uri = Uri.parse('https://example.com@other.example/login');
 
       final findings = analyzer.analyze(uri);
 
       expect(
-        findings.any((finding) => finding.contains('embedded')),
+        findings.any((finding) => finding.description.contains('embedded')),
         isTrue,
       );
     });
 
     test('Detects suspicious keywords', () {
-      final uri = Uri.parse(
-        'https://example.com/verify-account',
-      );
+      final uri = Uri.parse('https://example.com/verify-account');
 
       final findings = analyzer.analyze(uri);
 
       expect(
-        findings.any((finding) => finding.contains('verify-account')),
+        findings.any(
+          (finding) => finding.description.contains('verify-account'),
+        ),
         isTrue,
       );
     });
@@ -62,14 +59,13 @@ void main() {
       expect(findings, isEmpty);
     });
 
-
     test('Detects IPv6 hostnames', () {
       final uri = Uri.parse('https://[2001:db8::1]/login');
 
       final findings = analyzer.analyze(uri);
 
       expect(
-        findings.any((f) => f.contains('IPv6 address')),
+        findings.any((f) => f.description.contains('IPv6 address')),
         isTrue,
       );
     });
@@ -80,7 +76,7 @@ void main() {
       final findings = analyzer.analyze(uri);
 
       expect(
-        findings.any((f) => f.contains('non-standard port')),
+        findings.any((f) => f.description.contains('non-standard port')),
         isTrue,
       );
     });
@@ -91,7 +87,7 @@ void main() {
       final findings = analyzer.analyze(uri);
 
       expect(
-        findings.any((f) => f.contains('non-standard port')),
+        findings.any((f) => f.description.contains('non-standard port')),
         isFalse,
       );
     });
@@ -99,26 +95,21 @@ void main() {
     test('Detects percent-encoded paths', () {
       const rawUrl = 'https://example.com/%76erify-account';
 
-      final findings = analyzer.analyze(
-        Uri.parse(rawUrl),
-        rawUrl: rawUrl,
-      );
+      final findings = analyzer.analyze(Uri.parse(rawUrl), rawUrl: rawUrl);
 
       expect(
-        findings.any((f) => f.contains('percent-encoded')),
+        findings.any((f) => f.description.contains('percent-encoded')),
         isTrue,
       );
     });
 
     test('Detects keywords in decoded paths', () {
-      final uri = Uri.parse(
-        'https://example.com/%76erify-account',
-      );
+      final uri = Uri.parse('https://example.com/%76erify-account');
 
       final findings = analyzer.analyze(uri);
 
       expect(
-        findings.any((f) => f.contains('verify-account')),
+        findings.any((f) => f.description.contains('verify-account')),
         isTrue,
       );
     });
@@ -130,6 +121,5 @@ void main() {
 
       expect(findings, isEmpty);
     });
-
   });
 }

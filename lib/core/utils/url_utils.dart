@@ -1,4 +1,3 @@
-
 class UrlUtils {
   /// Converts recognizable web addresses into parsed URIs.
   ///
@@ -24,8 +23,7 @@ class UrlUtils {
 
     // Preserve explicitly supplied HTTP/HTTPS schemes.
     if (parsed.hasScheme) {
-      if (parsed.scheme != 'http' &&
-          parsed.scheme != 'https') {
+      if (parsed.scheme != 'http' && parsed.scheme != 'https') {
         return null;
       }
 
@@ -48,8 +46,7 @@ class UrlUtils {
     // Assume HTTPS for recognizable domain or IPv4 URLs.
     final normalized = Uri.tryParse('https://$content');
 
-    if (normalized == null ||
-        !_isValidWebUri(normalized)) {
+    if (normalized == null || !_isValidWebUri(normalized)) {
       return null;
     }
 
@@ -57,8 +54,7 @@ class UrlUtils {
   }
 
   static bool _isValidWebUri(Uri uri) {
-    if (uri.scheme != 'http' &&
-        uri.scheme != 'https') {
+    if (uri.scheme != 'http' && uri.scheme != 'https') {
       return false;
     }
 
@@ -93,14 +89,10 @@ class UrlUtils {
       return false;
     }
 
-    final labelPattern = RegExp(
-      r'^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$',
-    );
+    final labelPattern = RegExp(r'^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$');
 
     for (final label in labels) {
-      if (label.isEmpty ||
-          label.length > 63 ||
-          !labelPattern.hasMatch(label)) {
+      if (label.isEmpty || label.length > 63 || !labelPattern.hasMatch(label)) {
         return false;
       }
     }

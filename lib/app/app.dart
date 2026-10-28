@@ -12,9 +12,7 @@ class QuishSonyarApp extends StatelessWidget {
 
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.pinkAccent,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pinkAccent),
       ),
 
       home: const ScannerScreen(),

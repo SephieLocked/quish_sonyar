@@ -5,10 +5,7 @@ import '../models/analysis_result.dart';
 class RiskIndicator extends StatelessWidget {
   final RiskLevel riskLevel;
 
-  const RiskIndicator({
-    super.key,
-    required this.riskLevel,
-  });
+  const RiskIndicator({super.key, required this.riskLevel});
 
   @override
   Widget build(BuildContext context) {
@@ -23,19 +20,12 @@ class RiskIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: color.withValues(alpha: 0.40),
-          width: 2,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.40), width: 2),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 64,
-          ),
+          Icon(icon, color: color, size: 64),
 
           const SizedBox(height: 16),
 

@@ -1,16 +1,8 @@
+import 'security_finding.dart';
 
-enum RiskLevel {
-  low,
-  medium,
-  high,
-  unknown,
-}
+enum RiskLevel { low, medium, high, unknown }
 
-enum ContentType {
-  url,
-  text,
-  other,
-}
+enum ContentType { url, text, other }
 
 class AnalysisResult {
   // Original content extracted from the QR code.
@@ -23,7 +15,7 @@ class AnalysisResult {
   final RiskLevel riskLevel;
 
   // Reasons explaining the assessment.
-  final List<String> findings;
+  final List<SecurityFinding> findings;
 
   // Whether analysis has finished.
   final bool isComplete;

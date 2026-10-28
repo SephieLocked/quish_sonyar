@@ -1,10 +1,4 @@
-
-enum FindingSeverity {
-  informational,
-  low,
-  medium,
-  high,
-}
+enum FindingSeverity { informational, low, medium, high }
 
 class SecurityFinding {
   final String code;

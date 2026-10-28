@@ -1,12 +1,14 @@
 import '../models/analysis_result.dart';
+import '../models/security_finding.dart';
 import 'url_analyzer.dart';
 import '../../../core/utils/url_utils.dart';
+import 'risk_classifier.dart';
 
 class AnalysisService {
   final UrlAnalyzer _urlAnalyzer;
 
   AnalysisService({UrlAnalyzer? urlAnalyzer})
-      : _urlAnalyzer = urlAnalyzer ?? UrlAnalyzer();
+    : _urlAnalyzer = urlAnalyzer ?? UrlAnalyzer();
 
   /// Analyzes the raw content extracted from a QR code.
   Future<AnalysisResult> analyze(String rawContent) async {
@@ -18,7 +20,7 @@ class AnalysisService {
         rawContent: rawContent,
         contentType: ContentType.other,
         riskLevel: RiskLevel.unknown,
-        findings: ['The QR code contains no readable content.'],
+        findings: <SecurityFinding>[],
         isComplete: true,
       );
     }
@@ -26,53 +28,29 @@ class AnalysisService {
     // Attempt to parse the content as a URI.
     final uri = UrlUtils.normalize(content);
 
+    // Non-URL content.
     if (uri == null) {
       return AnalysisResult(
         rawContent: rawContent,
         contentType: ContentType.text,
         riskLevel: RiskLevel.unknown,
-        findings: [
-          'The QR content is not a recognized HTTP or HTTPS URL.',
-          'No web URL security analysis was performed.',
-        ],
+        findings: <SecurityFinding>[],
         isComplete: true,
       );
     }
 
-    final findings = _urlAnalyzer.analyze(uri, rawUrl:content,);
+    // Analyze the normalized URL.
+    final securityFindings = _urlAnalyzer.analyze(uri, rawUrl: content);
 
-    // Determine a preliminary risk classification.
-    final riskLevel = _classifyRisk(findings);
+    // Determine preliminary risk classification.
+    final riskLevel = RiskClassifier.classify(securityFindings);
 
     return AnalysisResult(
       rawContent: rawContent,
       contentType: ContentType.url,
       riskLevel: riskLevel,
-      findings: findings.isEmpty
-          ? [
-        'No suspicious patterns were detected '
-            'by the current local checks.',
-        'This does not guarantee the website is safe.',
-      ]
-          : findings,
+      findings: securityFindings,
       isComplete: true,
     );
-  }
-
-  /// Temporary heuristic-based risk classification.
-  RiskLevel _classifyRisk(List<String> findings) {
-    if (findings.isEmpty) {
-      return RiskLevel.unknown;
-    }
-
-    if (findings.length >= 3) {
-      return RiskLevel.high;
-    }
-
-    if (findings.length == 2) {
-      return RiskLevel.medium;
-    }
-
-    return RiskLevel.low;
   }
 }

@@ -42,9 +42,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => AnalysisScreen(
-            qrContent: content!,
-          ),
+          builder: (context) => AnalysisScreen(qrContent: content!),
         ),
       );
     } finally {
@@ -68,23 +66,13 @@ class _ScannerScreenState extends State<ScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quish Sonyar'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Quish Sonyar'), centerTitle: true),
       body: Stack(
         children: [
-          MobileScanner(
-            controller: _controller,
-            onDetect: _handleDetection,
-          ),
+          MobileScanner(controller: _controller, onDetect: _handleDetection),
 
           const Center(
-            child: Icon(
-              Icons.crop_free,
-              size: 250,
-              color: Colors.pinkAccent,
-            ),
+            child: Icon(Icons.crop_free, size: 250, color: Colors.pinkAccent),
           ),
 
           const Positioned(
@@ -98,12 +86,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    blurRadius: 6,
-                    color: Colors.black,
-                  ),
-                ],
+                shadows: [Shadow(blurRadius: 6, color: Colors.black)],
               ),
             ),
           ),
